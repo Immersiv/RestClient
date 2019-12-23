@@ -5,9 +5,12 @@ using UnityEngine.Networking;
 
 namespace Proyecto26
 {
-    public class RequestHelper
+    public partial class RequestHelper
     {
         private string _uri;
+        /// <summary>
+        /// Defines the target URL for the UnityWebRequest to communicate with
+        /// </summary>
         public string Uri
         {
             get { return _uri; }
@@ -15,6 +18,9 @@ namespace Proyecto26
         }
 
         private string _method;
+        /// <summary>
+        /// Defines the HTTP verb used by this UnityWebRequest, such as GET or POST.
+        /// </summary>
         public string Method
         {
             get { return _method; }
@@ -22,6 +28,9 @@ namespace Proyecto26
         }
 
         private object _body;
+        /// <summary>
+        /// The data to send to the server, encoding the body with JsonUtility
+        /// </summary>
         public object Body
         {
             get { return _body; }
@@ -29,6 +38,9 @@ namespace Proyecto26
         }
 
         private string _bodyString;
+        /// <summary>
+        /// The data serialized as string to send to the web server (Using other tools instead of JsonUtility)
+        /// </summary>
         public string BodyString
         {
             get { return _bodyString; }
@@ -36,6 +48,9 @@ namespace Proyecto26
         }
 
         private byte[] _bodyRaw;
+        /// <summary>
+        /// The data as byte array to send to the server
+        /// </summary>
         public byte[] BodyRaw
         {
             get { return _bodyRaw; }
@@ -43,6 +58,9 @@ namespace Proyecto26
         }
 
         private int? _timeout;
+        /// <summary>
+        /// Sets UnityWebRequest to attempt to abort after the number of seconds in timeout have passed.
+        /// </summary>
         public int? Timeout
         {
             get { return _timeout; }
@@ -50,6 +68,9 @@ namespace Proyecto26
         }
 
         private string _contentType;
+        /// <summary>
+        /// Override the content type of the request manually
+        /// </summary>
         public string ContentType
         {
             get { return _contentType; }
@@ -57,6 +78,9 @@ namespace Proyecto26
         }
 
         private int _retries;
+        /// <summary>
+        /// The number of retries of the request
+        /// </summary>
         public int Retries
         {
             get { return _retries; }
@@ -64,6 +88,9 @@ namespace Proyecto26
         }
 
         private float _retrySecondsDelay;
+        /// <summary>
+        /// Seconds of delay to make a retry
+        /// </summary>
         public float RetrySecondsDelay
         {
             get { return _retrySecondsDelay; }
@@ -71,6 +98,9 @@ namespace Proyecto26
         }
 
         private Action<RequestException, int> _retryCallback;
+        /// <summary>
+        /// A callback executed before to retry a request
+        /// </summary>
         public Action<RequestException, int> RetryCallback
         {
             get { return _retryCallback; }
@@ -78,6 +108,9 @@ namespace Proyecto26
         }
 
         private bool _enableDebug;
+        /// <summary>
+        /// Enable logs of the requests for debug mode
+        /// </summary>
         public bool EnableDebug
         {
             get { return _enableDebug; }
@@ -85,13 +118,19 @@ namespace Proyecto26
         }
 
         private bool? _chunkedTransfer;
+        /// <summary>
+        /// Indicates whether the UnityWebRequest system should employ the HTTP/1.1 chunked-transfer encoding method.
+        /// </summary>
         public bool? ChunkedTransfer
         {
             get { return _chunkedTransfer; }
             set { _chunkedTransfer = value; }
         }
 
-        private bool? _useHttpContinue;
+        private bool? _useHttpContinue = true;
+        /// <summary>
+        /// Determines whether this UnityWebRequest will include Expect: 100-Continue in its outgoing request headers. (Default: true).
+        /// </summary>
         public bool? UseHttpContinue
         {
             get { return _useHttpContinue; }
@@ -99,6 +138,9 @@ namespace Proyecto26
         }
 
         private int? _redirectLimit;
+        /// <summary>
+        /// Indicates the number of redirects which this UnityWebRequest will follow before halting with a “Redirect Limit Exceeded” system error.
+        /// </summary>
         public int? RedirectLimit
         {
             get { return _redirectLimit; }
@@ -106,6 +148,9 @@ namespace Proyecto26
         }
 
         private bool _ignoreHttpException;
+        /// <summary>
+        /// Prevent to catch http exceptions
+        /// </summary>
         public bool IgnoreHttpException
         {
             get { return _ignoreHttpException; }
@@ -113,6 +158,9 @@ namespace Proyecto26
         }
 
         private WWWForm _formData;
+        /// <summary>
+        /// The form data to send to the web server using WWWForm
+        /// </summary>
         public WWWForm FormData
         {
             get { return _formData; }
@@ -120,6 +168,9 @@ namespace Proyecto26
         }
 
         private Dictionary<string, string> _simpleForm;
+        /// <summary>
+        /// The form data to send to the web server using Dictionary
+        /// </summary>
         public Dictionary<string, string> SimpleForm
         {
             get { return _simpleForm; }
@@ -127,6 +178,9 @@ namespace Proyecto26
         }
 
         private List<IMultipartFormSection> _formSections;
+        /// <summary>
+        /// The form data to send to the web server using IMultipartFormSection
+        /// </summary>
         public List<IMultipartFormSection> FormSections
         {
             get { return _formSections; }
@@ -135,6 +189,9 @@ namespace Proyecto26
 
 #if UNITY_2018_1_OR_NEWER
         private CertificateHandler _certificateHandler;
+        /// <summary>
+        /// Holds a reference to a CertificateHandler object, which manages certificate validation for this UnityWebRequest.
+        /// </summary>
         public CertificateHandler CertificateHandler
         {
             get { return _certificateHandler; }
@@ -143,6 +200,9 @@ namespace Proyecto26
 #endif
 
         private UploadHandler _uploadHandler;
+        /// <summary>
+        /// Holds a reference to the UploadHandler object which manages body data to be uploaded to the remote server.
+        /// </summary>
         public UploadHandler UploadHandler
         {
             get { return _uploadHandler; }
@@ -150,8 +210,11 @@ namespace Proyecto26
         }
 
         private DownloadHandler _downloadHandler;
-        public DownloadHandler DownloadHandler
-        {
+        /// <summary>
+        /// Holds a reference to a DownloadHandler object, which manages body data received from the remote server by this UnityWebRequest.
+        /// </summary>
+        public DownloadHandler DownloadHandler 
+        { 
             get { return _downloadHandler; }
             set { _downloadHandler = value; }
         }
@@ -171,8 +234,11 @@ namespace Proyecto26
         }
 
         private Dictionary<string, string> _headers;
-        public Dictionary<string, string> Headers
-        {
+        /// <summary>
+        /// The HTTP headers added manually to send with the request
+        /// </summary>
+        public Dictionary<string, string> Headers 
+        { 
             get
             {
                 if (_headers == null)
@@ -181,109 +247,34 @@ namespace Proyecto26
                 }
                 return _headers;
             }
-            set { _headers = value; }
+            set { _headers = value; } 
         }
 
-        public float UploadProgress
-        {
-            get
-            {
-                float progress = 0;
-                if (this.Request != null)
-                {
-                    progress = this.Request.uploadProgress;
-                }
-                return progress;
-            }
-        }
-
-        public ulong UploadedBytes
-        {
-            get
-            {
-                ulong bytes = 0;
-                if (this.Request != null)
-                {
-                    bytes = this.Request.uploadedBytes;
-                }
-                return bytes;
-            }
-        }
-
-        public float DownloadProgress
-        {
-            get
-            {
-                float progress = 0;
-                if (this.Request != null)
-                {
-                    progress = this.Request.downloadProgress;
-                }
-                return progress;
-            }
-        }
-
-        public ulong DownloadedBytes
-        {
-            get
-            {
-                ulong bytes = 0;
-                if (this.Request != null)
-                {
-                    bytes = this.Request.downloadedBytes;
-                }
-                return bytes;
-            }
-        }
-
+        private Dictionary<string, string> _params;
         /// <summary>
-        /// Internal use
+        /// The HTTP query string params to send with the request
         /// </summary>
-        public UnityWebRequest Request { private get; set; }
-
-        /// <summary>
-        /// Get the value of a header
-        /// </summary>
-        /// <returns>The string value of the header.</returns>
-        /// <param name="name">The name of the header.</param>
-        public string GetHeader(string name)
+        public Dictionary<string, string> Params
         {
-            string headerValue;
-            if (this.Request != null)
+            get
             {
-                headerValue = this.Request.GetRequestHeader(name);
+                if (_params == null)
+                {
+                    _params = new Dictionary<string, string>();
+                }
+                return _params;
             }
-            else
-            {
-                this.Headers.TryGetValue(name, out headerValue);
-            }
-            return headerValue;
+            set { _params = value; }
         }
 
-        private bool _isAborted;
-        public bool IsAborted
-        {
-            get { return _isAborted; }
-            set { _isAborted = value; }
-        }
-
+        private bool _parseResponseBody = true;
         /// <summary>
-        /// Abort the request manually
+        /// Whether to parse the response body as JSON or not. Note: parsing a large non-text file will have severe performance impact.
         /// </summary>
-        public void Abort()
+        public bool ParseResponseBody
         {
-            if (this.Request != null && !this.IsAborted)
-            {
-                try
-                {
-                    this.IsAborted = true;
-                    this.Request.Abort();
-                }
-                finally
-                {
-                    this.Request = null;
-                }
-            }
+            get { return _parseResponseBody; }
+            set { _parseResponseBody = value; }
         }
     }
 }

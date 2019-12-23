@@ -10,14 +10,50 @@ namespace Proyecto26
 {
     /// <summary>
     /// RestClient for Unity
-    /// Version: 2.5.2
+    /// Version: 2.6.0
     /// </summary>
     public static partial class RestClient
     {
         #region Common
 
         /// <summary>
-        /// The default request headers.
+        /// Gets the version of the RestClient library.
+        /// </summary>
+        public static System.Version Version
+        {
+            get
+            {
+                return typeof(RestClient).Assembly.GetName().Version;
+            }
+        }
+
+        /// <summary>
+        /// Default query string params.
+        /// </summary>
+        private static Dictionary<string, string> _defaultRequestParams;
+        public static Dictionary<string, string> DefaultRequestParams
+        {
+            get
+            {
+                if (_defaultRequestParams == null)
+                {
+                    _defaultRequestParams = new Dictionary<string, string>();
+                }
+                return _defaultRequestParams;
+            }
+            set { _defaultRequestParams = value; }
+        }
+
+        /// <summary>
+        /// Clear default query string params.
+        /// </summary>
+        public static void ClearDefaultParams()
+        {
+            DefaultRequestParams.Clear();
+        }
+
+        /// <summary>
+        /// Default headers.
         /// </summary>
         private static Dictionary<string, string> _defaultRequestHeaders;
         public static Dictionary<string, string> DefaultRequestHeaders
@@ -34,9 +70,9 @@ namespace Proyecto26
         }
 
         /// <summary>
-        /// Cleans the default headers.
+        /// Clear default headers.
         /// </summary>
-        public static void CleanDefaultHeaders()
+        public static void ClearDefaultHeaders()
         {
             DefaultRequestHeaders.Clear();
         }
@@ -200,6 +236,42 @@ namespace Proyecto26
         {
             options.Method = UnityWebRequest.kHttpVerbPOST;
             Request(options, callback);
+        }
+
+        /// <summary>
+        /// Load a JSON array from the server using a HTTP POST request.
+        /// </summary>
+        /// <param name="url">A string containing the URL to which the request is sent.</param>
+        /// <param name="body">A plain object that is sent to the server with the request.</param>
+        /// <param name="callback">A callback function that is executed when the request is finished.</param>
+        /// <typeparam name="T">The element type of the array.</typeparam>
+        public static void PostArray<T>(string url, object body, Action<RequestException, ResponseHelper, T[]> callback)
+        {
+            PostArray<T>(new RequestHelper { Uri = url, Body = body }, callback);
+        }
+
+        /// <summary>
+        /// Load a JSON array from the server using a HTTP POST request.
+        /// </summary>
+        /// <param name="url">A string containing the URL to which the request is sent.</param>
+        /// <param name="bodyString">A string that is sent to the server with the request.</param>
+        /// <param name="callback">A callback function that is executed when the request is finished.</param>
+        /// <typeparam name="T">The element type of the array.</typeparam>
+        public static void PostArray<T>(string url, string bodyString, Action<RequestException, ResponseHelper, T[]> callback)
+        {
+            PostArray<T>(new RequestHelper { Uri = url, BodyString = bodyString }, callback);
+        }
+
+        /// <summary>
+        /// Load a JSON array from the server using a HTTP POST request.
+        /// </summary>
+        /// <param name="options">The options of the request.</param>
+        /// <param name="callback">A callback function that is executed when the request is finished.</param>
+        /// <typeparam name="T">The element type of the array.</typeparam>
+        public static void PostArray<T>(RequestHelper options, Action<RequestException, ResponseHelper, T[]> callback)
+        {
+            options.Method = UnityWebRequest.kHttpVerbPOST;
+            StaticCoroutine.StartCoroutine(HttpBase.DefaultUnityWebRequest(options, callback));
         }
 
         /// <summary>

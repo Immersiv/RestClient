@@ -1,6 +1,13 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/969f6b9d04324af58382f7ee7a8faccd)](https://www.codacy.com/app/jdnichollsc/RestClient?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=proyecto26/RestClient&amp;utm_campaign=Badge_Grade)
-[![BCH compliance](https://bettercodehub.com/edge/badge/proyecto26/RestClient?branch=master)](https://bettercodehub.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/969f6b9d04324af58382f7ee7a8faccd)](https://app.codacy.com/app/jdnichollsc/RestClient?utm_source=github.com&utm_medium=referral&utm_content=proyecto26/RestClient&utm_campaign=Badge_Grade_Dashboard)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://github.com/proyecto26/RestClient/graphs/commit-activity)
+[![Tidelift Subscription](https://tidelift.com/badges/package/nuget/Proyecto26.RestClient)](https://tidelift.com/subscription/pkg/nuget-proyecto26-restclient?utm_source=nuget-proyecto26-restclient&utm_medium=referral&utm_campaign=readme)
 [![Build Status](https://travis-ci.org/proyecto26/RestClient.svg?branch=master)](https://travis-ci.org/proyecto26/RestClient)
+[![Twitter Follow][twitter-image]][twitter-url]
+<!-- TODO: Refactor code [![BCH compliance](https://bettercodehub.com/edge/badge/proyecto26/RestClient?branch=master)](https://bettercodehub.com/)--> 
+
+[twitter-image]:https://img.shields.io/twitter/follow/jdnichollsc.svg?style=social&label=Follow%20me
+[twitter-url]:https://twitter.com/jdnichollsc
 
 # RestClient for Unity 🤘
 
@@ -43,7 +50,7 @@ RestClient.GetArray<Post>(api + "/posts").Then(response => {
 - Get **Arrays** Supported
 - Default **HTTP** Methods **(GET, POST, PUT, DELETE, HEAD)**
 - Generic **REQUEST** method to create any http request
-- Based on **Promises** for a better asynchronous programming
+- Based on **Promises** for a better asynchronous programming. Learn about Promises [here](https://github.com/Real-Serious-Games/C-Sharp-Promise)!
 - Handle HTTP exceptions in a better way
 - Retry HTTP requests easily
 - Open Source 🦄
@@ -54,7 +61,7 @@ The [UnityWebRequest](https://docs.unity3d.com/Manual/UnityWebRequest.html) syst
 * All versions of the Editor and Standalone players
 * WebGL
 * Mobile platforms: iOS, Android
-* Universal Windows Platform ([RSG.Promise_standard.dll](https://github.com/proyecto26/RestClient/releases) is required)
+* Universal Windows Platform
 * PS4 and PSVita
 * XboxOne
 * HoloLens
@@ -111,6 +118,9 @@ RestClient.Request(new RequestHelper {
   Uri = "https://jsonplaceholder.typicode.com/photos",
   Method = "POST",
   Timeout = 10,
+  Params = new Dictionary<string, string> {
+    { "param1", "Query string param..." }
+  },
   Headers = new Dictionary<string, string> {
     { "Authorization", "Bearer JWT_token..." }
   },
@@ -120,7 +130,7 @@ RestClient.Request(new RequestHelper {
   FormData = new WWWForm(), //Send files, etc with POST requests
   SimpleForm = new Dictionary<string, string> {}, //Content-Type: application/x-www-form-urlencoded
   FormSections = new List<IMultipartFormSection>() {}, //Content-Type: multipart/form-data
-  CertificateHandler = new CustomCertificateHandler(), //Included in the source code of this library
+  CertificateHandler = new CustomCertificateHandler(), //Create custom certificates
   UploadHandler = new UploadHandlerRaw(bytes), //Send bytes directly if it's required
   DownloadHandler = new DownloadHandlerFile(destPah), //Download large files
   ContentType = "application/json", //JSON is used by default
@@ -131,14 +141,33 @@ RestClient.Request(new RequestHelper {
   IgnoreHttpException = true, //Prevent to catch http exceptions
   ChunkedTransfer = false,
   UseHttpContinue = true,
-  RedirectLimit = 32
+  RedirectLimit = 32,
+  DefaultContentType = false, //Disable JSON content type by default
+  ParseResponseBody = false //Don't encode and parse downloaded data as JSON
 }).Then(response => {
-  //Get resources via downloadHandler to have more control!
+  //Get resources via downloadHandler to get more control!
   Texture texture = ((DownloadHandlerTexture)response.Request.downloadHandler).texture;
   AudioClip audioClip = ((DownloadHandlerAudioClip)response.Request.downloadHandler).audioClip;
   AssetBundle assetBundle = ((DownloadHandlerAssetBundle)response.Request.downloadHandler).assetBundle;
 
   EditorUtility.DisplayDialog("Status", response.StatusCode.ToString(), "Ok");
+});
+```
+
+- Example downloading an audio file:
+```csharp
+var fileUrl = "https://raw.githubusercontent.com/IonDen/ion.sound/master/sounds/bell_ring.ogg";
+var fileType = AudioType.OGGVORBIS;
+
+RestClient.Get(new RequestHelper {
+  Uri = fileUrl,
+  DownloadHandler = new DownloadHandlerAudioClip(fileUrl, fileType)
+}).Then(res => {
+  AudioSource audio = GetComponent<AudioSource>();
+  audio.clip = ((DownloadHandlerAudioClip)res.Request.downloadHandler).audioClip;
+  audio.Play();
+}).Catch(err => {
+  EditorUtility.DisplayDialog ("Error", err.Message, "Ok");
 });
 ```
 
@@ -191,18 +220,26 @@ RestClient.Put<CustomResponse>(usersRoute + "/1", updatedUser).Then(customRespon
 });
 ```
 
-## Custom HTTP Headers and Options 💥
+## Custom HTTP Headers, Params and Options 💥
 **HTTP Headers**, such as `Authorization`, can be set in the **DefaultRequestHeaders** object for all requests
 ```csharp
 RestClient.DefaultRequestHeaders["Authorization"] = "Bearer ...";
 ```
 
-Also we can add specific options and override default headers for a request
+**Query string params** can be set in the **DefaultRequestParams** object for all requests
+```csharp
+RestClient.DefaultRequestParams["param1"] = "Query string value...";
+```
+
+Also we can add specific options and override default headers and params for a request
 ```csharp
 var currentRequest = new RequestHelper { 
   Uri = "https://jsonplaceholder.typicode.com/photos",
   Headers = new Dictionary<string, string> {
     { "Authorization", "Other token..." }
+  },
+  Params = new Dictionary<string, string> {
+    { "param1", "Other value..." }
   }
 };
 RestClient.GetArray<Photo>(currentRequest).Then(response => {
@@ -219,9 +256,10 @@ currentRequest.DownloadedBytes; //The number of bytes of body data the system ha
 currentRequest.Abort(); //Abort the request manually
 ```
 
-Later we can clean the default headers for all requests
+Later we can clear the default headers and params for all requests
 ```csharp
-RestClient.CleanDefaultHeaders();
+RestClient.ClearDefaultHeaders();
+RestClient.ClearDefaultParams();
 ```
 
 ### Example
@@ -267,8 +305,12 @@ router.post('/', function(req, res) {
 ## Supporting 🍻
 I believe in Unicorns 🦄
 Support [me](http://www.paypal.me/jdnichollsc/2), if you do too.
+[Professionally supported Proyecto26.RestClient is coming soon](https://tidelift.com/subscription/pkg/nuget-proyecto26-restclient?utm_source=nuget-proyecto26-restclient&utm_medium=referral&utm_campaign=readme)
 
 Hey mate, any good review from the [Unity Store](https://assetstore.unity.com/packages/tools/network/rest-client-for-unity-102501) is also really appreciated!
+
+## Security contact information 🚨
+To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security). Tidelift will coordinate the fix and disclosure.
 
 ## Happy coding 💯
 Made with ❤️
