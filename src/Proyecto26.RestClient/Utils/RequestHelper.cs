@@ -150,15 +150,29 @@ namespace Proyecto26
         }
 
         private DownloadHandler _downloadHandler;
-        public DownloadHandler DownloadHandler 
-        { 
+        public DownloadHandler DownloadHandler
+        {
             get { return _downloadHandler; }
             set { _downloadHandler = value; }
         }
 
+        private JsonParser _JsonParser;
+        public JsonParser JsonParser
+        {
+            get
+            {
+                if (_JsonParser == null)
+                {
+                    _JsonParser = new JsonParserUnity();
+                }
+                return _JsonParser;
+            }
+            set { _JsonParser = value; }
+        }
+
         private Dictionary<string, string> _headers;
-        public Dictionary<string, string> Headers 
-        { 
+        public Dictionary<string, string> Headers
+        {
             get
             {
                 if (_headers == null)
@@ -167,15 +181,15 @@ namespace Proyecto26
                 }
                 return _headers;
             }
-            set { _headers = value; } 
+            set { _headers = value; }
         }
 
         public float UploadProgress
         {
-            get 
+            get
             {
                 float progress = 0;
-                if(this.Request != null)
+                if (this.Request != null)
                 {
                     progress = this.Request.uploadProgress;
                 }
@@ -256,7 +270,8 @@ namespace Proyecto26
         /// <summary>
         /// Abort the request manually
         /// </summary>
-        public void Abort() {
+        public void Abort()
+        {
             if (this.Request != null && !this.IsAborted)
             {
                 try

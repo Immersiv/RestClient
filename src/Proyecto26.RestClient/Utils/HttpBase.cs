@@ -1,9 +1,9 @@
-﻿using System;
-using System.Text;
+﻿using Proyecto26.Common.Extensions;
+using System;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using Proyecto26.Common.Extensions;
 
 namespace Proyecto26
 {
@@ -28,7 +28,7 @@ namespace Proyecto26
                     {
                         yield return new WaitForSeconds(options.RetrySecondsDelay);
                         retries++;
-                        if(options.RetryCallback != null)
+                        if (options.RetryCallback != null)
                         {
                             options.RetryCallback(CreateException(request), retries);
                         }
@@ -82,11 +82,12 @@ namespace Proyecto26
 
         public static IEnumerator DefaultUnityWebRequest<TResponse>(RequestHelper options, Action<RequestException, ResponseHelper, TResponse> callback)
         {
-            return CreateRequestAndRetry(options, (RequestException err, ResponseHelper res) => {
+            return CreateRequestAndRetry(options, (RequestException err, ResponseHelper res) =>
+            {
                 var body = default(TResponse);
                 if (err == null && !string.IsNullOrEmpty(res.Text))
                 {
-                    body = JsonUtility.FromJson<TResponse>(res.Text);
+                    body = options.JsonParser.FromJson<TResponse>(res.Text);
                 }
                 callback(err, res, body);
             });
@@ -94,11 +95,12 @@ namespace Proyecto26
 
         public static IEnumerator DefaultUnityWebRequest<TResponse>(RequestHelper options, Action<RequestException, ResponseHelper, TResponse[]> callback)
         {
-            return CreateRequestAndRetry(options, (RequestException err, ResponseHelper res) => {
+            return CreateRequestAndRetry(options, (RequestException err, ResponseHelper res) =>
+            {
                 var body = default(TResponse[]);
                 if (err == null && !string.IsNullOrEmpty(res.Text))
                 {
-                    body = JsonHelper.ArrayFromJson<TResponse>(res.Text);
+                    body = options.JsonParser.ArrayFromJson<TResponse>(res.Text);
                 }
                 callback(err, res, body);
             });
@@ -119,7 +121,7 @@ namespace Proyecto26
                 var bodyString = options.BodyString;
                 if (options.Body != null)
                 {
-                    bodyString = JsonUtility.ToJson(options.Body);
+                    bodyString = options.JsonParser.ToJson(options.Body);
                 }
                 bodyRaw = Encoding.UTF8.GetBytes(bodyString.ToCharArray());
             }
@@ -155,13 +157,13 @@ namespace Proyecto26
                 request.uploadHandler = options.UploadHandler;
             if (bodyRaw != null)
             {
-                request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
                 request.uploadHandler.contentType = contentType;
             }
             if (options.DownloadHandler is DownloadHandler)
                 request.downloadHandler = options.DownloadHandler;
             else
-                request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                request.downloadHandler = new DownloadHandlerBuffer();
             if (!string.IsNullOrEmpty(contentType))
             {
                 request.SetRequestHeader("Content-Type", contentType);
